@@ -3,7 +3,6 @@ import { AppConfig } from '../types';
 
 /**
  * 默认配置项
- * 如果 config.json 加载失败，将回退到此配置
  */
 const DEFAULT_CONFIG: AppConfig = {
   adminName: 'ylyt',
@@ -12,46 +11,34 @@ const DEFAULT_CONFIG: AppConfig = {
   logoUrl: 'ylyt.png' 
 };
 
+// 使用单次页面加载时固定的时间戳，确保在应用运行期间 URL 稳定，减少闪烁
+const sessionTimestamp = Date.now();
+
 export const ConfigService = {
   /**
    * 加载配置文件
    */
   async loadConfig(): Promise<AppConfig> {
     try {
-      // 尝试加载当前目录下的 config.json
-      const response = await fetch(`config.json?t=${Date.now()}`, {
-        cache: 'no-store',
-        headers: {
-          'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
-        }
+      const response = await fetch(`config.json?t=${sessionTimestamp}`, {
+        cache: 'no-store'
       });
       
-      if (!response.ok) {
-        console.warn('未找到 config.json 配置文件，使用代码内置默认配置');
-        return DEFAULT_CONFIG;
-      }
-      
+      if (!response.ok) return DEFAULT_CONFIG;
       const config = await response.json();
-      
-      return {
-        ...DEFAULT_CONFIG,
-        ...config
-      };
+      return { ...DEFAULT_CONFIG, ...config };
     } catch (e) {
-      console.error('解析 config.json 失败', e);
       return DEFAULT_CONFIG;
     }
   },
 
   /**
-   * 给图片链接添加时间戳防止缓存
+   * 生成带稳定版本号的图片 URL
    */
   getLogoUrlWithCacheBuster(url: string): string {
-    if (!url) return '';
-    // 如果是 data:uri 或者已经包含版本号则不处理
-    if (url.startsWith('data:')) return url;
+    if (!url || url.startsWith('data:')) return url;
     const separator = url.includes('?') ? '&' : '?';
-    return `${url}${separator}v=${Date.now()}`;
+    // 使用 session 级别的时间戳，保证在此次页面访问期间 URL 是唯一的但稳定的
+    return `${url}${separator}v=${sessionTimestamp}`;
   }
 };

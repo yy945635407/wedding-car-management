@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Car, SeatPosition, User, ViewState, Notification, NotificationType, AppConfig } from './types';
 import { StorageService } from './services/storage';
@@ -19,13 +19,14 @@ const App: React.FC = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [config, setConfig] = useState<AppConfig | null>(null);
 
-  const showToast = (message: string, type: NotificationType = 'info') => {
+  // 使用 useCallback 保证引用稳定
+  const showToast = useCallback((message: string, type: NotificationType = 'info') => {
     const id = Date.now().toString() + Math.random().toString();
     setNotifications(prev => [...prev, { id, message, type }]);
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
-    }, 3000);
-  };
+    }, 4000); // 稍微延长显示时间
+  }, []);
 
   useEffect(() => {
     const initApp = async () => {
@@ -37,6 +38,14 @@ const App: React.FC = () => {
         ]);
         setConfig(configData);
         setCars(carsData);
+        
+        // 自动恢复会话
+        const sessionUser = localStorage.getItem('wedding_user_session');
+        if (sessionUser) {
+          const parsed = JSON.parse(sessionUser);
+          setUser(parsed);
+          setView({ type: 'HOME' });
+        }
       } catch (error) {
         console.error("Initialization failed", error);
       } finally {
@@ -51,15 +60,6 @@ const App: React.FC = () => {
       StorageService.saveCars(cars);
     }
   }, [cars, loading]);
-
-  useEffect(() => {
-    const sessionUser = localStorage.getItem('wedding_user_session');
-    if (sessionUser) {
-      const parsed = JSON.parse(sessionUser);
-      setUser(parsed);
-      setView({ type: 'HOME' });
-    }
-  }, []);
 
   const handleLogin = (name: string) => {
     if (!config) return;
@@ -79,7 +79,7 @@ const App: React.FC = () => {
     localStorage.removeItem('wedding_user_session');
     setUser(null);
     setView({ type: 'LOGIN' });
-    showToast('已退出登录', 'info');
+    showToast('已安全退出登录', 'info');
   };
 
   const handleAddCar = (plate: string, driverName: string) => {
@@ -97,7 +97,7 @@ const App: React.FC = () => {
     if (user) LogService.addLog(user.name, '添加车辆', `添加了车辆 ${plate}, 司机: ${driverName}`);
     setCars(prev => [...prev, newCar]);
     setView({ type: 'SEAT_SELECTION', carId: newCar.id });
-    showToast('婚车添加成功', 'success');
+    showToast('婚车添加成功，请分配座位', 'success');
   };
 
   const handleToggleSeat = (carId: string, position: SeatPosition) => {
@@ -105,7 +105,7 @@ const App: React.FC = () => {
     const isDriverOfAnyCar = cars.some(c => c.driverName === user.name);
     
     if (isDriverOfAnyCar && position !== 'driver') {
-        showToast("司机不能占用乘客座位！", 'error');
+        showToast("司机请专注于驾驶哦，不要占用乘客位~", 'error');
         return;
     }
 
@@ -113,7 +113,6 @@ const App: React.FC = () => {
       const targetCar = prevCars.find(c => c.id === carId);
       if (!targetCar) return prevCars;
 
-      const previousCarState = JSON.parse(JSON.stringify(targetCar));
       const wasInThisSeat = targetCar.seats[position] === user.name;
       
       const cleanCars = prevCars.map(c => ({
@@ -127,18 +126,17 @@ const App: React.FC = () => {
       }));
 
       const newTargetCar = cleanCars.find(c => c.id === carId)!;
-      let logMsg = '';
+      const posName = { passenger: '副驾驶', rearLeft: '后排左', rearRight: '后排右' }[position];
 
       if (!wasInThisSeat) {
         newTargetCar.seats[position] = user.name;
-        const posName = { passenger: '副驾驶', rearLeft: '后排左', rearRight: '后排右' }[position];
-        logMsg = `入座了 ${newTargetCar.plate} 的 ${posName}`;
+        showToast(`成功入座 ${newTargetCar.plate} 的 ${posName}`, 'success');
+        LogService.addLog(user.name, '选座', `入座了 ${newTargetCar.plate} 的 ${posName}`);
       } else {
-        const posName = { passenger: '副驾驶', rearLeft: '后排左', rearRight: '后排右' }[position];
-        logMsg = `离开了 ${newTargetCar.plate} 的 ${posName}`;
+        showToast(`已从 ${newTargetCar.plate} 离座`, 'info');
+        LogService.addLog(user.name, '离座', `离开了 ${newTargetCar.plate} 的 ${posName}`);
       }
       
-      LogService.addLog(user.name, wasInThisSeat ? '离座' : '选座', logMsg);
       return [...cleanCars];
     });
   };
@@ -147,18 +145,22 @@ const App: React.FC = () => {
     const car = cars.find(c => c.id === carId);
     if (user && car) LogService.addLog(user.name, '删除车辆', `删除了车辆 ${car.plate}`);
     setCars(prev => prev.filter(c => c.id !== carId));
-    showToast('婚车已删除', 'success');
+    showToast('车辆已成功从车队移除', 'success');
   };
 
   const handleReorder = (newOrder: Car[]) => {
     if (user?.isAdmin) {
-      LogService.addLog(user.name, '调整排序', '调整了车队顺序');
       setCars(newOrder);
     }
   };
 
   if (loading || !config) {
-    return <div className="h-screen w-screen flex items-center justify-center bg-slate-50 text-wedding-pink-dark">Loading...</div>;
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-white">
+        <div className="w-12 h-12 border-4 border-wedding-pink border-t-wedding-pink-dark rounded-full animate-spin mb-4" />
+        <p className="text-slate-400 font-medium animate-pulse">正在筹备车队...</p>
+      </div>
+    );
   }
 
   return (
