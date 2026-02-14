@@ -12,6 +12,7 @@
 *   **会话保持**：支持登录状态持久化。
 
 ### 2. 车队管理 (主页)
+*   **品牌标识**：支持自定义 Logo，显示在登录页和主页顶部。
 *   **车队展示**：横向滚动查看所有婚车，直观显示每辆车的序号、车牌、司机及入座率。
 *   **添加车辆**：支持输入车牌号和司机姓名快速添加新婚车。
 *   **车辆排序**：管理员可通过长按并拖拽的方式自由调整车队中车辆的行进顺序。
@@ -20,108 +21,67 @@
 
 ### 3. 在线选座
 *   **可视化座位图**：精美的 2x2 布局（主驾、副驾、后排左右），配合小车模型背景。
-*   **智能选座**：
-    *   点击空座即可入座。
-    *   点击其他空座自动切换位置。
-    *   点击自己已选座位可取消选择。
-    *   司机不能占用乘客座位。
-*   **状态同步**：实时显示座位上的宾客姓名。
+*   **智能选座**：实时显示座位上的宾客姓名，支持一键入座/离座。
+
+---
+
+## ⚙️ 动态配置 (管理员必看)
+
+项目部署后，你可以通过修改根目录下的 `config.json` 来快速调整系统参数，**无需重新打包**。
+
+### 1. 修改 Logo
+你可以通过 `logoUrl` 字段更改系统 Logo。支持以下两种方式：
+
+*   **使用网络图片**：
+    将 `logoUrl` 设置为图片的完整 URL 地址。
+    ```json
+    "logoUrl": "https://example.com/your-logo.png"
+    ```
+*   **使用本地图片**：
+    1. 将你的 Logo 图片文件（如 `my-logo.png`）放入服务器网站根目录（如果是本地开发环境，则放入 `public/` 文件夹）。
+    2. 将 `logoUrl` 设置为以 `/` 开头的相对路径。
+    ```json
+    "logoUrl": "/my-logo.png"
+    ```
+
+### 2. 其他配置项
+*   `adminName`: 设置管理员的登录名字。
+*   `weddingTitle`: 设置系统的标题（如“张三 & 李四”）。
+*   `infoMessage`: 设置点击主页“i”图标时弹出的温馨提示。
 
 ---
 
 ## 🛠️ 部署上线的操作方法
 
-本项目基于现代前端技术栈 (Vite + React + TypeScript) 构建，**必须经过编译**生成静态文件后才能部署到服务器。
-
 ### 1. 环境准备
 确保你的本地开发电脑上安装了 [Node.js](https://nodejs.org/) (推荐 v18 或更高版本)。
 
 ### 2. 本地构建 (Build)
-在将代码上传到服务器之前，需要在本地执行构建命令，生成可用于生产环境的代码。
-
-1.  打开终端 (Terminal/CMD)，进入项目根目录。
-2.  如果是第一次运行，请先安装依赖：
-    ```bash
-    npm install
-    ```
-3.  执行构建命令：
-    ```bash
-    npm run build
-    ```
-4.  命令执行成功后，项目根目录下会生成一个名为 **`dist`** 的文件夹。
-    *   这个文件夹包含了所有编译后的 HTML、CSS、JavaScript 和资源文件。
-    *   **注意**：你只需要部署这个 `dist` 文件夹里的内容，不需要上传源代码。
+1.  在项目根目录打开终端。
+2.  安装依赖：`npm install`
+3.  执行构建：`npm run build`
+4.  生成的 **`dist`** 文件夹即为上线所需的所有静态文件。
 
 ### 3. 服务器部署 (Nginx 示例)
-假设你的云服务器使用 Nginx 作为 Web 服务器。
+将 `dist` 文件夹内的内容上传到服务器目录（如 `/var/www/wedding`），并配置 Nginx：
 
-1.  **上传文件**：
-    将本地 **`dist` 文件夹内的所有文件** 上传到服务器的网站根目录（例如 `/var/www/wedding`）。
-    *   确保 `index.html`、`assets` 文件夹、`config.json` 等都在该目录下。
-
-2.  **配置 Nginx**：
-    修改 Nginx 配置文件（通常在 `/etc/nginx/sites-available/default` 或 `/etc/nginx/conf.d/your-site.conf`），添加如下配置：
-
-    ```nginx
-    server {
-        listen 80;
-        server_name your-domain.com; # 替换为你的域名
-
-        # 指向你上传文件的目录
-        root /var/www/wedding; 
-        index index.html;
-
-        # 核心配置：支持 React 路由
-        location / {
-            try_files $uri $uri/ /index.html;
-        }
-
-        # 可选：开启 gzip 压缩加速加载
-        gzip on;
-        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    root /var/www/wedding;
+    index index.html;
+    location / {
+        try_files $uri $uri/ /index.html;
     }
-    ```
-
-3.  **重启 Nginx**：
-    ```bash
-    sudo nginx -t  # 检查配置语法
-    sudo systemctl restart nginx # 重启服务
-    ```
-
-4.  **访问**：
-    在浏览器输入你的域名，即可看到系统。
+}
+```
 
 ---
 
-## ⚙️ 动态配置 (服务器端修改)
-
-部署上线后，如果需要修改管理员名字或婚礼标题，**不需要重新打包上传**。
-
-1.  登录你的云服务器。
-2.  进入网站根目录（例如 `/var/www/wedding`）。
-3.  找到 `config.json` 文件。
-4.  使用编辑器（如 vim 或 nano）修改内容：
-    ```bash
-    nano config.json
-    ```
-    ```json
-    {
-      "adminName": "new_admin",
-      "weddingTitle": "新的婚礼标题",
-      "infoMessage": "更新后的婚礼信息..."
-    }
-    ```
-5.  保存退出。
-6.  刷新浏览器页面，新配置立即生效。
-
----
-
-## 💻 本地开发指南 (开发者用)
+## 💻 本地开发指南
 
 如果你需要修改代码功能：
-
-1.  启动开发服务器：
-    ```bash
-    npm run dev
-    ```
-2.  访问 `http://localhost:5173` 进行调试。
+1. `npm run dev` 启动开发服务器。
+2. 访问 `http://localhost:5173`。
+3. 修改 `public/config.json` 可实时预览配置更改。
