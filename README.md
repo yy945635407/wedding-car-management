@@ -1,20 +1,47 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 婚车管理系统 (Wedding Fleet Manager)
 
-# Run and deploy your AI Studio app
+一个精致、优雅的婚车车队管理系统，专为婚礼筹备设计。采用 IOS 风格的 UI 设计，主打粉色与淡蓝色的浪漫色调。
 
-This contains everything you need to run your app locally.
+## ✨ 主要功能
 
-View your app in AI Studio: https://ai.studio/apps/drive/1sVmuVoCDVn6OTTHa94RXTECF1229qEgf
+### 1. 用户系统
+*   **名字登录**：宾客通过输入名字直接登录，简单快捷。
+*   **权限管理**：
+    *   普通宾客：查看车队、选择座位。
+    *   管理员 (用户名 `ylyt`)：额外拥有删除车辆、拖拽调整车队顺序的权限。
+*   **会话保持**：支持登录状态持久化。
 
-## Run Locally
+### 2. 车队管理 (主页)
+*   **车队展示**：横向滚动查看所有婚车，直观显示每辆车的序号、车牌、司机及入座率。
+*   **添加车辆**：支持输入车牌号和司机姓名快速添加新婚车。
+*   **车辆排序**：管理员可通过长按并拖拽的方式自由调整车队中车辆的行进顺序。
+*   **删除车辆**：管理员可将车辆拖拽至底部垃圾桶区域进行删除。
+*   **结婚信息**：顶部导航栏提供婚礼时间等补充信息提示。
 
-**Prerequisites:**  Node.js
+### 3. 在线选座
+*   **可视化座位图**：精美的 2x2 布局（主驾、副驾、后排左右），配合小车模型背景。
+*   **智能选座**：
+    *   点击空座即可入座。
+    *   点击其他空座自动切换位置。
+    *   点击自己已选座位可取消选择。
+    *   司机不能占用乘客座位。
+*   **状态同步**：实时显示座位上的宾客姓名。
 
+### 4. 交互体验
+*   **IOS 风格动画**：使用 Framer Motion 实现流畅的页面切换和元素动态效果。
+*   **消息通知**：自定义的气泡通知 (Toast)，用于操作成功、错误提示及信息展示。
+*   **响应式设计**：适配移动端操作习惯。
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 🛠 技术栈
+
+本项目采用现代前端技术构建：
+
+*   **核心框架**: [React 19](https://react.dev/)
+*   **开发语言**: [TypeScript](https://www.typescriptlang.org/)
+*   **样式库**: [Tailwind CSS](https://tailwindcss.com/)
+*   **动画库**: [Framer Motion](https://www.framer.com/motion/)
+*   **构建工具**: ES Modules (通过 esm.sh 引入依赖)
+
+## 📦 部署说明
+
+项目为一个纯静态单页应用 (SPA)，数据目前存储在本地 LocalStorage 中（可根据需求扩展为后端 API）。任何支持静态网站托管的服务（如 Vercel, Netlify, Nginx 等）均可部署。
