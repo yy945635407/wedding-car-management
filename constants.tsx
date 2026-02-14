@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 // Using simple SVG strings for icons to avoid external huge libraries dependency for this specific output format,
@@ -22,6 +23,3 @@ export const Icons = {
      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 12v-6"/><path d="M12 12l-4.5 4.5"/><path d="M12 12l4.5 4.5"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
   )
 };
-
-export const ADMIN_NAME = 'ylyt';
-export const WEDDING_DATE_INFO = "结亲时间预计 2026.3.21 7:00 左右哦";

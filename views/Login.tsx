@@ -1,12 +1,14 @@
+
 import React, { useState } from 'react';
 import { Icons } from '../constants';
 import { IOSSwitch } from '../components/IOSSwitch';
 
 interface LoginProps {
   onLogin: (name: string) => void;
+  weddingTitle: string;
 }
 
-export const Login: React.FC<LoginProps> = ({ onLogin }) => {
+export const Login: React.FC<LoginProps> = ({ onLogin, weddingTitle }) => {
   const [name, setName] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -23,7 +25,7 @@ export const Login: React.FC<LoginProps> = ({ onLogin }) => {
            {/* Wedding Icon */}
            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 5c-1.5 0-2.8 1.4-3 2-3.5-1.5-11-.3-11 5 0 1.8 0 3 2 4.5V20h4v-2h3v2h4v-4c1-.5 1.7-1 2-2.5V5z"/><path d="M2 9v1c0 1.1.9 2 2 2h1"/><path d="M16 11h0"/></svg>
         </div>
-        <h1 className="text-2xl font-bold text-center text-slate-800 mb-2">欢迎参加婚礼</h1>
+        <h1 className="text-2xl font-bold text-center text-slate-800 mb-2">欢迎参加{weddingTitle}的婚礼</h1>
         <p className="text-center text-slate-500 mb-8 text-sm">请输入您的名字加入婚车车队</p>
         
         <form onSubmit={handleSubmit} className="space-y-4">

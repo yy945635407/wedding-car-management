@@ -1,8 +1,9 @@
+
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
-import { AppData, Car, SeatPosition, User, ViewState, Notification, NotificationType } from './types';
+import { AppData, Car, SeatPosition, User, ViewState, Notification, NotificationType, AppConfig } from './types';
 import { StorageService } from './services/storage';
-import { ADMIN_NAME, WEDDING_DATE_INFO } from './constants';
+import { ConfigService } from './services/config';
 import { Login } from './views/Login';
 import { Home } from './views/Home';
 import { AddCar } from './views/AddCar';
@@ -15,6 +16,7 @@ const App: React.FC = () => {
   const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [config, setConfig] = useState<AppConfig | null>(null);
 
   // Notification Helper
   const showToast = (message: string, type: NotificationType = 'info') => {
@@ -25,12 +27,23 @@ const App: React.FC = () => {
     }, 3000); // Slightly longer for readability
   };
 
-  // Load cars on mount
+  // Load config and cars on mount
   useEffect(() => {
-    StorageService.getCars().then(data => {
-      setCars(data);
-      setLoading(false);
-    });
+    const initApp = async () => {
+      try {
+        const [configData, carsData] = await Promise.all([
+          ConfigService.loadConfig(),
+          StorageService.getCars()
+        ]);
+        setConfig(configData);
+        setCars(carsData);
+      } catch (error) {
+        console.error("Initialization failed", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    initApp();
   }, []);
 
   // Save cars on change
@@ -51,9 +64,10 @@ const App: React.FC = () => {
   }, []);
 
   const handleLogin = (name: string) => {
+    if (!config) return;
     const newUser: User = {
       name,
-      isAdmin: name === ADMIN_NAME
+      isAdmin: name === config.adminName
     };
     setUser(newUser);
     localStorage.setItem('wedding_user_session', JSON.stringify(newUser));
@@ -150,7 +164,7 @@ const App: React.FC = () => {
 
   // --- Render ---
 
-  if (loading) {
+  if (loading || !config) {
     return <div className="h-screen w-screen flex items-center justify-center bg-slate-50 text-wedding-pink-dark">Loading...</div>;
   }
 
@@ -160,7 +174,11 @@ const App: React.FC = () => {
       <AnimatePresence mode="wait">
         
         {view.type === 'LOGIN' && (
-          <Login key="login" onLogin={handleLogin} />
+          <Login 
+            key="login" 
+            onLogin={handleLogin} 
+            weddingTitle={config.weddingTitle} 
+          />
         )}
 
         {view.type === 'HOME' && user && (
@@ -168,12 +186,13 @@ const App: React.FC = () => {
             key="home"
             currentUser={user}
             cars={cars}
+            weddingTitle={config.weddingTitle}
             onLogout={handleLogout}
             onAddCar={() => setView({ type: 'ADD_CAR' })}
             onSelectCar={(id) => setView({ type: 'SEAT_SELECTION', carId: id })}
             onReorderCars={handleReorder}
             onDeleteCar={handleDeleteCar}
-            onShowInfo={() => showToast(WEDDING_DATE_INFO, 'pink')}
+            onShowInfo={() => showToast(config.infoMessage, 'pink')}
           />
         )}
 

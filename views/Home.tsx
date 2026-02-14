@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Reorder, AnimatePresence, motion } from 'framer-motion';
 import { Car, User } from '../types';
@@ -7,6 +8,7 @@ import { IOSSwitch } from '../components/IOSSwitch';
 interface HomeProps {
   currentUser: User;
   cars: Car[];
+  weddingTitle: string;
   onLogout: () => void;
   onAddCar: () => void;
   onSelectCar: (carId: string) => void;
@@ -18,6 +20,7 @@ interface HomeProps {
 export const Home: React.FC<HomeProps> = ({ 
   currentUser, 
   cars, 
+  weddingTitle,
   onLogout, 
   onAddCar, 
   onSelectCar, 
@@ -46,7 +49,7 @@ export const Home: React.FC<HomeProps> = ({
       {/* Header */}
       <header className="px-6 pt-12 pb-4 bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">婚车车队</h1>
+          <h1 className="text-xl font-bold text-slate-800">{weddingTitle}的婚车车队</h1>
           <button 
             onClick={onShowInfo}
             className="p-2 rounded-full text-wedding-pink-dark/70 hover:text-wedding-pink-dark hover:bg-wedding-pink/10 transition-all"

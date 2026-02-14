@@ -1,3 +1,4 @@
+
 export interface User {
   name: string;
   isAdmin: boolean;
@@ -21,6 +22,12 @@ export interface Car {
 
 export interface AppData {
   cars: Car[];
+}
+
+export interface AppConfig {
+  adminName: string;
+  weddingTitle: string;
+  infoMessage: string;
 }
 
 export type ViewState = 
