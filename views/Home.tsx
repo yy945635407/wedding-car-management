@@ -1,10 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Reorder, AnimatePresence, motion } from 'framer-motion';
 import { Car, User } from '../types';
 import { Icons } from '../constants';
 import { IOSSwitch } from '../components/IOSSwitch';
 import { LogService } from '../services/log';
+import { ConfigService } from '../services/config';
 
 interface HomeProps {
   currentUser: User;
@@ -33,6 +34,12 @@ export const Home: React.FC<HomeProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isOverTrash, setIsOverTrash] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  // 为 Logo 增加时间戳参数，强制浏览器刷新缓存
+  const finalLogoUrl = useMemo(() => {
+    return ConfigService.getLogoUrlWithCacheBuster(logoUrl);
+  }, [logoUrl]);
 
   const totalSeats = cars.length * 4;
   const occupiedCount = cars.reduce((acc, car) => {
@@ -51,12 +58,17 @@ export const Home: React.FC<HomeProps> = ({
       <header className="px-6 pt-12 pb-4 bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center gap-3">
-            {logoUrl && (
+            {logoUrl && !imgError ? (
               <img 
-                src={logoUrl} 
+                src={finalLogoUrl} 
                 alt="Wedding Logo" 
+                onError={() => setImgError(true)}
                 className="w-8 h-8 rounded-full object-cover border border-wedding-pink-dark/20 shadow-sm"
               />
+            ) : (
+              <div className="text-wedding-pink-dark">
+                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99z"/></svg>
+              </div>
             )}
             <h1 className="text-xl font-bold text-slate-800">{weddingTitle}的婚车车队</h1>
           </div>

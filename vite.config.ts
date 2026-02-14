@@ -7,5 +7,6 @@ export default defineConfig({
   build: {
     outDir: 'dist',
   },
-  publicDir: 'public' 
+  // 将根目录设为公共资源目录，以便 ylyt.png 能在预览和部署中被直接作为静态资源访问
+  publicDir: '.' 
 });

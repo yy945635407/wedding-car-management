@@ -9,19 +9,17 @@ const DEFAULT_CONFIG: AppConfig = {
   adminName: 'ylyt',
   weddingTitle: 'ylyt',
   infoMessage: '结亲时间预计 2026.3.21 7:00 左右哦',
-  logoUrl: '' 
+  logoUrl: 'ylyt.png' 
 };
 
 export const ConfigService = {
   /**
    * 加载配置文件
-   * 开发环境下：读取 /public/config.json
-   * 生产环境下：读取构建产物根目录下的 /config.json
    */
   async loadConfig(): Promise<AppConfig> {
     try {
-      // 增加 cache: 'no-store' 强制浏览器不缓存此请求
-      const response = await fetch(`/config.json?t=${Date.now()}`, {
+      // 尝试加载当前目录下的 config.json
+      const response = await fetch(`config.json?t=${Date.now()}`, {
         cache: 'no-store',
         headers: {
           'Cache-Control': 'no-cache',
@@ -30,19 +28,30 @@ export const ConfigService = {
       });
       
       if (!response.ok) {
-        console.warn('未找到 config.json 配置文件，将使用默认配置');
+        console.warn('未找到 config.json 配置文件，使用代码内置默认配置');
         return DEFAULT_CONFIG;
       }
       
       const config = await response.json();
-      // 验证必要字段，防止空的 JSON 导致崩溃
+      
       return {
         ...DEFAULT_CONFIG,
         ...config
       };
     } catch (e) {
-      console.error('解析 config.json 失败，请检查文件格式是否为标准的 JSON', e);
+      console.error('解析 config.json 失败', e);
       return DEFAULT_CONFIG;
     }
+  },
+
+  /**
+   * 给图片链接添加时间戳防止缓存
+   */
+  getLogoUrlWithCacheBuster(url: string): string {
+    if (!url) return '';
+    // 如果是 data:uri 或者已经包含版本号则不处理
+    if (url.startsWith('data:')) return url;
+    const separator = url.includes('?') ? '&' : '?';
+    return `${url}${separator}v=${Date.now()}`;
   }
 };
