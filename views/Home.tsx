@@ -4,6 +4,7 @@ import { Reorder, AnimatePresence, motion } from 'framer-motion';
 import { Car, User } from '../types';
 import { Icons } from '../constants';
 import { IOSSwitch } from '../components/IOSSwitch';
+import { LogService } from '../services/log';
 
 interface HomeProps {
   currentUser: User;
@@ -31,8 +32,7 @@ export const Home: React.FC<HomeProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isOverTrash, setIsOverTrash] = useState(false);
 
-  // Calculate stats
-  const totalSeats = cars.length * 4; // Driver + 3 passengers
+  const totalSeats = cars.length * 4;
   const occupiedCount = cars.reduce((acc, car) => {
     let count = 0;
     if (car.seats.driver) count++;
@@ -46,20 +46,29 @@ export const Home: React.FC<HomeProps> = ({
 
   return (
     <IOSSwitch className="flex flex-col h-full bg-gradient-to-b from-slate-50 to-white overflow-hidden">
-      {/* Header */}
       <header className="px-6 pt-12 pb-4 bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-xl font-bold text-slate-800">{weddingTitle}的婚车车队</h1>
-          <button 
-            onClick={onShowInfo}
-            className="p-2 rounded-full text-wedding-pink-dark/70 hover:text-wedding-pink-dark hover:bg-wedding-pink/10 transition-all"
-            aria-label="Info"
-          >
-            <Icons.Info />
-          </button>
+          <div className="flex items-center gap-1">
+            {currentUser.isAdmin && (
+              <button 
+                onClick={() => LogService.exportLogs()}
+                className="p-2 rounded-full text-wedding-blue-dark hover:bg-wedding-blue/30 transition-all mr-1"
+                title="导出系统日志"
+              >
+                <Icons.Download />
+              </button>
+            )}
+            <button 
+              onClick={onShowInfo}
+              className="p-2 rounded-full text-wedding-pink-dark/70 hover:text-wedding-pink-dark hover:bg-wedding-pink/10 transition-all"
+              aria-label="Info"
+            >
+              <Icons.Info />
+            </button>
+          </div>
         </div>
         
-        {/* Prominent Stats */}
         <div className="flex gap-4">
            <div className="flex-1 bg-gradient-to-br from-wedding-pink to-pink-50 rounded-2xl p-5 shadow-md border border-pink-100 flex flex-col items-center justify-center">
              <div className="text-wedding-pink-dark text-xs font-bold uppercase tracking-wider mb-2">婚车总数</div>
@@ -72,7 +81,6 @@ export const Home: React.FC<HomeProps> = ({
         </div>
       </header>
 
-      {/* Car List (Horizontal) */}
       <div className="flex-1 overflow-y-hidden overflow-x-auto flex items-center px-6 py-8 no-scrollbar touch-pan-x">
         <Reorder.Group 
           axis="x" 
@@ -81,7 +89,6 @@ export const Home: React.FC<HomeProps> = ({
           className="flex items-center gap-2 h-full"
         >
           {cars.map((car, index) => {
-            // Count occupied in this car
             let carOccupied = 0;
             if (car.seats.driver) carOccupied++;
             if (car.seats.passenger) carOccupied++;
@@ -92,10 +99,10 @@ export const Home: React.FC<HomeProps> = ({
               <React.Fragment key={car.id}>
                 <Reorder.Item
                   value={car}
-                  dragListener={currentUser.isAdmin} // Only admin can drag
+                  dragListener={currentUser.isAdmin}
                   className="relative group flex-shrink-0"
                   whileDrag={{ scale: 1.05, zIndex: 50 }}
-                  drag // Allow free dragging to enable dragging to bottom trash zone
+                  drag 
                   onDragStart={() => currentUser.isAdmin && setIsDragging(true)}
                   onDrag={(e, info) => {
                     if (!currentUser.isAdmin) return;
@@ -110,11 +117,8 @@ export const Home: React.FC<HomeProps> = ({
                     if (!currentUser.isAdmin) return;
                     setIsDragging(false);
                     setIsOverTrash(false);
-                    
-                    // Trash zone is at the bottom 150px
                     const trashThreshold = window.innerHeight - 150;
                     if (info.point.y > trashThreshold) {
-                        // Direct delete for better UX on drag-drop
                         onDeleteCar(car.id);
                     }
                   }}
@@ -123,10 +127,7 @@ export const Home: React.FC<HomeProps> = ({
                     onClick={() => onSelectCar(car.id)}
                     className="w-64 h-80 bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-slate-100 flex flex-col items-center justify-between p-6 active:scale-95 transition-transform duration-200 cursor-pointer overflow-hidden relative"
                   >
-                    {/* Decorative Background Blob */}
                     <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-wedding-pink/30 to-transparent" />
-
-                    {/* Header Info */}
                     <div className="z-10 text-center w-full mt-4">
                       <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white shadow-sm font-bold text-slate-400 mb-3 border border-slate-100 text-sm">
                         #{index + 1}
@@ -134,13 +135,9 @@ export const Home: React.FC<HomeProps> = ({
                       <h3 className="text-xl font-bold text-slate-800 tracking-tight">{car.plate}</h3>
                       <p className="text-sm text-slate-500 mt-1">司机: {car.driverName}</p>
                     </div>
-
-                    {/* Visual Car Icon */}
                     <div className="z-10 text-wedding-pink-dark opacity-80 my-2">
                       <svg width="100" height="60" viewBox="0 0 24 24" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
                     </div>
-
-                    {/* Stats */}
                     <div className="z-10 w-full">
                       <div className="flex justify-between items-end mb-2">
                         <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">入座率</span>
@@ -155,29 +152,22 @@ export const Home: React.FC<HomeProps> = ({
                     </div>
                   </div>
                 </Reorder.Item>
-
-                {/* Connector Line */}
                 {index < cars.length - 1 && (
                   <div className="w-8 h-1 bg-wedding-pink rounded-full flex-shrink-0" />
                 )}
               </React.Fragment>
             );
           })}
-
-          {/* Add Car Button */}
           {cars.length > 0 && <div className="w-8 h-1 bg-wedding-pink rounded-full flex-shrink-0" />}
-          
           <button 
             onClick={onAddCar}
             className="w-16 h-80 flex-shrink-0 flex items-center justify-center rounded-[2rem] border-2 border-dashed border-wedding-pink-dark/30 text-wedding-pink-dark hover:bg-wedding-pink/10 transition-colors active:scale-95"
           >
             <Icons.Plus />
           </button>
-
         </Reorder.Group>
       </div>
 
-      {/* Footer / Trash Zone */}
       <AnimatePresence>
         {isDragging && currentUser.isAdmin ? (
           <motion.div

@@ -1,8 +1,6 @@
 
 import React from 'react';
 
-// Using simple SVG strings for icons to avoid external huge libraries dependency for this specific output format,
-// but in a real project, lucide-react or heroicons would be installed.
 export const Icons = {
   Plus: () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
@@ -21,5 +19,8 @@ export const Icons = {
   ),
   SteeringWheel: () => (
      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 12v-6"/><path d="M12 12l-4.5 4.5"/><path d="M12 12l4.5 4.5"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+  ),
+  Download: () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
   )
 };

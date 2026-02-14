@@ -30,6 +30,14 @@ export interface AppConfig {
   infoMessage: string;
 }
 
+export interface SystemLog {
+  timestamp: string;
+  ip: string;
+  username: string;
+  action: string;
+  details: string;
+}
+
 export type ViewState = 
   | { type: 'LOGIN' }
   | { type: 'HOME' }
