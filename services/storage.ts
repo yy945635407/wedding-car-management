@@ -1,43 +1,54 @@
+
 import { Car } from '../types';
 
-const STORAGE_KEY = 'wedding_fleet_data';
-
-// Initial Mock Data
-const INITIAL_DATA: Car[] = [
-  {
-    id: 'car-1',
-    plate: '京A·88888',
-    driverName: '王叔',
-    seats: { driver: '王叔', passenger: null, rearLeft: null, rearRight: null }
-  },
-  {
-    id: 'car-2',
-    plate: '京A·66666',
-    driverName: '李哥',
-    seats: { driver: '李哥', passenger: '小明', rearLeft: null, rearRight: null }
-  }
-];
-
-// Helper to simulate network delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const API_URL = '/api/cars';
 
 export const StorageService = {
+  /**
+   * 从后端 API 获取公共车队数据
+   */
   async getCars(): Promise<Car[]> {
-    await delay(300); // Simulate network
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DATA));
-      return INITIAL_DATA;
+    try {
+      const response = await fetch(`${API_URL}?t=${Date.now()}`, {
+        cache: 'no-store'
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      console.warn('API 获取失败，尝试加载静态备用数据:', error);
+      try {
+        const fallback = await fetch('cars.json').then(res => res.json());
+        return fallback;
+      } catch (e) {
+        return [];
+      }
     }
-    return JSON.parse(raw);
   },
 
-  async saveCars(cars: Car[]): Promise<void> {
-    await delay(100); // Simulate network
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cars));
-  },
-  
-  // In a real implementation with a JSON file on server:
-  // getCars would be: fetch('/api/data.json').then(res => res.json())
-  // saveCars would be: fetch('/api/save', { method: 'POST', body: JSON.stringify(cars) })
+  /**
+   * 将数据保存至服务器
+   */
+  async saveCars(cars: Car[]): Promise<boolean> {
+    if (!cars || cars.length === 0) return true;
+    
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(cars)
+      });
+      
+      return response.ok;
+    } catch (error) {
+      console.error('保存至云端失败:', error);
+      return false;
+    }
+  }
 };

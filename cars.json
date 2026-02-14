@@ -1,0 +1,15 @@
+
+[
+  {
+    "id": "car-1",
+    "plate": "京A·88888",
+    "driverName": "王叔",
+    "seats": { "driver": "王叔", "passenger": null, "rearLeft": null, "rearRight": null }
+  },
+  {
+    "id": "car-2",
+    "plate": "京A·66666",
+    "driverName": "李哥",
+    "seats": { "driver": "李哥", "passenger": null, "rearLeft": null, "rearRight": null }
+  }
+]
