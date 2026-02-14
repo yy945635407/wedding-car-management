@@ -28,6 +28,7 @@ export interface AppConfig {
   adminName: string;
   weddingTitle: string;
   infoMessage: string;
+  logoUrl: string; // URL for the wedding logo
 }
 
 export interface SystemLog {

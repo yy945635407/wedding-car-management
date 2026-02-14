@@ -166,7 +166,7 @@ const App: React.FC = () => {
       <ToastContainer notifications={notifications} />
       <AnimatePresence mode="wait">
         {view.type === 'LOGIN' && (
-          <Login key="login" onLogin={handleLogin} weddingTitle={config.weddingTitle} />
+          <Login key="login" onLogin={handleLogin} weddingTitle={config.weddingTitle} logoUrl={config.logoUrl} />
         )}
 
         {view.type === 'HOME' && user && (
@@ -175,6 +175,7 @@ const App: React.FC = () => {
             currentUser={user}
             cars={cars}
             weddingTitle={config.weddingTitle}
+            logoUrl={config.logoUrl}
             onLogout={handleLogout}
             onAddCar={() => setView({ type: 'ADD_CAR' })}
             onSelectCar={(id) => setView({ type: 'SEAT_SELECTION', carId: id })}

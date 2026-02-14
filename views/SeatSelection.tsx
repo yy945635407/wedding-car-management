@@ -19,20 +19,27 @@ export const SeatSelection: React.FC<SeatSelectionProps> = ({ user, car, onBack,
     const isMe = occupant === user.name;
     const isDriverSeat = position === 'driver';
 
-    const handleTap = () => {
+    const handleTap = (e: any) => {
+      // 显式阻止冒泡，确保点击事件不被外层 drag 逻辑干扰
+      if (e && e.stopPropagation) e.stopPropagation();
+      
       if (isDriverSeat) return; 
       if (!isOccupied || isMe) {
         onToggleSeat(car.id, position);
       }
     };
 
+    const stopPropagation = (e: React.PointerEvent | React.TouchEvent) => {
+      e.stopPropagation();
+    };
+
     return (
       <motion.div 
         onTap={handleTap}
-        // 阻止 pointerDown 冒泡到父级 drag 容器，防止点击被误认为拖拽开始
-        onPointerDown={(e) => e.stopPropagation()}
+        onPointerDown={stopPropagation}
+        onTouchStart={stopPropagation}
         className={clsx(
-          "relative h-32 rounded-2xl flex flex-col items-center justify-center border-2 transition-all duration-300",
+          "relative h-32 rounded-2xl flex flex-col items-center justify-center border-2 transition-all duration-300 select-none",
           isDriverSeat 
             ? "bg-slate-100 border-slate-200 cursor-not-allowed" 
             : isMe 
@@ -64,6 +71,10 @@ export const SeatSelection: React.FC<SeatSelectionProps> = ({ user, car, onBack,
         dragDirectionLock
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={{ left: 0, right: 0.5 }}
+        // 关键修复：touchAction: 'pan-y' 告诉安卓浏览器：
+        // 纵向滑动由浏览器处理（允许滚动），横向滑动由 JS 处理（允许拖拽返回）。
+        // 这能有效解决安卓 Chrome 下需要双指才能触发横向拖拽的问题。
+        style={{ touchAction: 'pan-y' }}
         onDragEnd={(e, info) => {
           // 如果向右滑动超过 100px，则返回主页
           if (info.offset.x > 100) {
@@ -73,8 +84,12 @@ export const SeatSelection: React.FC<SeatSelectionProps> = ({ user, car, onBack,
       >
         <div className="px-6 pt-12 pb-4 flex items-center bg-white sticky top-0 z-10 shadow-sm">
           <motion.button 
-            onTap={onBack}
+            onTap={(e) => {
+              if (e && e.stopPropagation) e.stopPropagation();
+              onBack();
+            }}
             onPointerDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
             className="p-2 -ml-2 text-slate-600 active:bg-slate-100 rounded-full transition-colors"
           >
             <Icons.ArrowLeft />

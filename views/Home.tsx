@@ -10,6 +10,7 @@ interface HomeProps {
   currentUser: User;
   cars: Car[];
   weddingTitle: string;
+  logoUrl: string;
   onLogout: () => void;
   onAddCar: () => void;
   onSelectCar: (carId: string) => void;
@@ -22,6 +23,7 @@ export const Home: React.FC<HomeProps> = ({
   currentUser, 
   cars, 
   weddingTitle,
+  logoUrl,
   onLogout, 
   onAddCar, 
   onSelectCar, 
@@ -48,7 +50,16 @@ export const Home: React.FC<HomeProps> = ({
     <IOSSwitch className="flex flex-col h-full bg-gradient-to-b from-slate-50 to-white overflow-hidden">
       <header className="px-6 pt-12 pb-4 bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-gray-100">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-xl font-bold text-slate-800">{weddingTitle}的婚车车队</h1>
+          <div className="flex items-center gap-3">
+            {logoUrl && (
+              <img 
+                src={logoUrl} 
+                alt="Wedding Logo" 
+                className="w-8 h-8 rounded-full object-cover border border-wedding-pink-dark/20 shadow-sm"
+              />
+            )}
+            <h1 className="text-xl font-bold text-slate-800">{weddingTitle}的婚车车队</h1>
+          </div>
           <div className="flex items-center gap-1">
             {currentUser.isAdmin && (
               <button 

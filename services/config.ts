@@ -4,7 +4,8 @@ import { AppConfig } from '../types';
 const DEFAULT_CONFIG: AppConfig = {
   adminName: 'ylyt',
   weddingTitle: 'ylyt',
-  infoMessage: '结亲时间预计 2026.3.21 7:00 左右哦'
+  infoMessage: '结亲时间预计 2026.3.21 7:00 左右哦',
+  logoUrl: '' // Empty by default, allows placeholder
 };
 
 export const ConfigService = {
