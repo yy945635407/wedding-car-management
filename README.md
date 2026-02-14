@@ -1,4 +1,3 @@
-
 # 婚车管理系统 (Wedding Fleet Manager)
 
 一个精致、优雅的婚车车队管理系统，专为婚礼筹备设计。采用 IOS 风格的 UI 设计，主打粉色与淡蓝色的浪漫色调。
@@ -28,92 +27,101 @@
     *   司机不能占用乘客座位。
 *   **状态同步**：实时显示座位上的宾客姓名。
 
-### 4. 交互体验
-*   **IOS 风格动画**：使用 Framer Motion 实现流畅的页面切换和元素动态效果。
-*   **消息通知**：自定义的气泡通知 (Toast)，用于操作成功、错误提示及信息展示。
-*   **响应式设计**：适配移动端操作习惯。
+---
 
-## 🛠 技术栈
+## 🛠️ 部署上线的操作方法
 
-本项目采用现代前端技术构建：
+本项目基于现代前端技术栈 (Vite + React + TypeScript) 构建，**必须经过编译**生成静态文件后才能部署到服务器。
 
-*   **核心框架**: [React 19](https://react.dev/)
-*   **开发语言**: [TypeScript](https://www.typescriptlang.org/)
-*   **样式库**: [Tailwind CSS](https://tailwindcss.com/)
-*   **动画库**: [Framer Motion](https://www.framer.com/motion/)
-*   **构建工具**: ES Modules (通过 CDN 直接引入，无本地编译需求)
+### 1. 环境准备
+确保你的本地开发电脑上安装了 [Node.js](https://nodejs.org/) (推荐 v18 或更高版本)。
+
+### 2. 本地构建 (Build)
+在将代码上传到服务器之前，需要在本地执行构建命令，生成可用于生产环境的代码。
+
+1.  打开终端 (Terminal/CMD)，进入项目根目录。
+2.  如果是第一次运行，请先安装依赖：
+    ```bash
+    npm install
+    ```
+3.  执行构建命令：
+    ```bash
+    npm run build
+    ```
+4.  命令执行成功后，项目根目录下会生成一个名为 **`dist`** 的文件夹。
+    *   这个文件夹包含了所有编译后的 HTML、CSS、JavaScript 和资源文件。
+    *   **注意**：你只需要部署这个 `dist` 文件夹里的内容，不需要上传源代码。
+
+### 3. 服务器部署 (Nginx 示例)
+假设你的云服务器使用 Nginx 作为 Web 服务器。
+
+1.  **上传文件**：
+    将本地 **`dist` 文件夹内的所有文件** 上传到服务器的网站根目录（例如 `/var/www/wedding`）。
+    *   确保 `index.html`、`assets` 文件夹、`config.json` 等都在该目录下。
+
+2.  **配置 Nginx**：
+    修改 Nginx 配置文件（通常在 `/etc/nginx/sites-available/default` 或 `/etc/nginx/conf.d/your-site.conf`），添加如下配置：
+
+    ```nginx
+    server {
+        listen 80;
+        server_name your-domain.com; # 替换为你的域名
+
+        # 指向你上传文件的目录
+        root /var/www/wedding; 
+        index index.html;
+
+        # 核心配置：支持 React 路由
+        location / {
+            try_files $uri $uri/ /index.html;
+        }
+
+        # 可选：开启 gzip 压缩加速加载
+        gzip on;
+        gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+    }
+    ```
+
+3.  **重启 Nginx**：
+    ```bash
+    sudo nginx -t  # 检查配置语法
+    sudo systemctl restart nginx # 重启服务
+    ```
+
+4.  **访问**：
+    在浏览器输入你的域名，即可看到系统。
 
 ---
 
-## ⚙️ 动态配置 (Runtime Configuration)
+## ⚙️ 动态配置 (服务器端修改)
 
-项目支持在不重新编译或修改源码的情况下，通过修改根目录下的 `config.json` 文件来更新关键信息。
+部署上线后，如果需要修改管理员名字或婚礼标题，**不需要重新打包上传**。
 
-### 配置文件位置
-项目根目录下的 `config.json`。
-
-### 配置项说明
-```json
-{
-  "adminName": "ylyt",                                // 管理员登录名，默认为 ylyt
-  "weddingTitle": "ylyt",                             // 结婚主体/标题，显示在登录页和主页标题中
-  "infoMessage": "结亲时间预计 2026.3.21 7:00 左右哦"  // 主页右上角点击 "i" 图标弹出的提示信息
-}
-```
-
-### 如何修改生效
-1.  在服务器或本地文件夹中直接编辑 `config.json` 文件。
-2.  保存文件。
-3.  刷新浏览器页面，新配置即可生效（系统会自动通过时间戳绕过浏览器缓存读取最新配置）。
-
----
-
-## 💻 本地部署与运行手册
-
-本项目不需要复杂的 `npm install` 或构建过程，但由于使用了 ES Modules，**必须通过本地服务器启动**（直接双击 `index.html` 打开会因 CORS 策略报错）。
-
-请选择以下任一方式启动项目：
-
-### 方式一：使用 VS Code Live Server (最推荐 👍)
-适合前端新手或使用 VS Code 的开发者。
-
-1. 下载并安装 [Visual Studio Code](https://code.visualstudio.com/)。
-2. 在 VS Code 中安装 **"Live Server"** 插件。
-3. 使用 VS Code 打开本项目文件夹。
-4. 在左侧文件列表中右键点击 `index.html`。
-5. 选择 **"Open with Live Server"**。
-6. 浏览器将自动打开项目页面。
-
-### 方式二：使用 Python (无需额外安装)
-如果你的电脑是 Mac 或已安装 Python 的 Windows，这是最快的方式。
-
-1. 打开终端 (Terminal) 或 命令提示符 (CMD)。
-2. `cd` 进入项目根目录。
-3. 运行以下命令启动服务：
-   ```bash
-   # 如果是 Python 3.x
-   python -m http.server 8000
-   
-   # 如果是 Python 2.x
-   python -m SimpleHTTPServer 8000
-   ```
-4. 打开浏览器访问：`http://localhost:8000`
-
-### 方式三：使用 Node.js
-如果你是前端开发者，已安装 Node.js 环境。
-
-1. 打开终端进入项目目录。
-2. 使用 `npx` 运行 http-server：
-   ```bash
-   npx http-server .
-   ```
-3. 根据终端提示的地址（通常是 `http://127.0.0.1:8080`）访问。
+1.  登录你的云服务器。
+2.  进入网站根目录（例如 `/var/www/wedding`）。
+3.  找到 `config.json` 文件。
+4.  使用编辑器（如 vim 或 nano）修改内容：
+    ```bash
+    nano config.json
+    ```
+    ```json
+    {
+      "adminName": "new_admin",
+      "weddingTitle": "新的婚礼标题",
+      "infoMessage": "更新后的婚礼信息..."
+    }
+    ```
+5.  保存退出。
+6.  刷新浏览器页面，新配置立即生效。
 
 ---
 
-## ☁️ 云服务器部署
+## 💻 本地开发指南 (开发者用)
 
-项目本质上是一个纯静态网站（HTML + CSS + JS），可以部署在任何静态托管服务上：
+如果你需要修改代码功能：
 
-1. **Nginx 部署**：将项目所有文件上传至服务器目录（如 `/var/www/wedding`），配置 Nginx `root` 指向该目录即可。
-2. **Vercel / Netlify**：直接关联 GitHub 仓库，Build Command 留空，Output Directory 设置为 `.` (根目录) 即可自动部署。
+1.  启动开发服务器：
+    ```bash
+    npm run dev
+    ```
+2.  访问 `http://localhost:5173` 进行调试。

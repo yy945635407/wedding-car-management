@@ -10,8 +10,8 @@ const DEFAULT_CONFIG: AppConfig = {
 export const ConfigService = {
   async loadConfig(): Promise<AppConfig> {
     try {
-      // Add timestamp to prevent browser caching when config is updated
-      const response = await fetch(`./config.json?t=${Date.now()}`);
+      // Use absolute path /config.json which works for both Dev (mapped to public) and Prod (root of dist)
+      const response = await fetch(`/config.json?t=${Date.now()}`);
       if (!response.ok) {
         console.warn('Config file not found, using defaults');
         return DEFAULT_CONFIG;
