@@ -19,7 +19,7 @@ export const SeatSelection: React.FC<SeatSelectionProps> = ({ user, car, onBack,
     const isMe = occupant === user.name;
     const isDriverSeat = position === 'driver';
 
-    const handleClick = () => {
+    const handleTap = () => {
       if (isDriverSeat) return; 
       if (!isOccupied || isMe) {
         onToggleSeat(car.id, position);
@@ -27,8 +27,10 @@ export const SeatSelection: React.FC<SeatSelectionProps> = ({ user, car, onBack,
     };
 
     return (
-      <div 
-        onClick={handleClick}
+      <motion.div 
+        onTap={handleTap}
+        // 阻止 pointerDown 冒泡到父级 drag 容器，防止点击被误认为拖拽开始
+        onPointerDown={(e) => e.stopPropagation()}
         className={clsx(
           "relative h-32 rounded-2xl flex flex-col items-center justify-center border-2 transition-all duration-300",
           isDriverSeat 
@@ -49,7 +51,7 @@ export const SeatSelection: React.FC<SeatSelectionProps> = ({ user, car, onBack,
         <span className={clsx("font-bold text-center px-2 truncate w-full", isMe ? "text-lg" : "text-md")}>
           {occupant || "空座"}
         </span>
-      </div>
+      </motion.div>
     );
   };
 
@@ -59,19 +61,24 @@ export const SeatSelection: React.FC<SeatSelectionProps> = ({ user, car, onBack,
       <motion.div 
         className="flex flex-col h-full"
         drag="x"
+        dragDirectionLock
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={{ left: 0, right: 0.5 }}
         onDragEnd={(e, info) => {
-          // If dragged more than 150px to the right, go back
-          if (info.offset.x > 150) {
+          // 如果向右滑动超过 100px，则返回主页
+          if (info.offset.x > 100) {
             onBack();
           }
         }}
       >
         <div className="px-6 pt-12 pb-4 flex items-center bg-white sticky top-0 z-10 shadow-sm">
-          <button onClick={onBack} className="p-2 -ml-2 text-slate-600">
+          <motion.button 
+            onTap={onBack}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="p-2 -ml-2 text-slate-600 active:bg-slate-100 rounded-full transition-colors"
+          >
             <Icons.ArrowLeft />
-          </button>
+          </motion.button>
           <div className="flex-1 text-center mr-8">
              <h1 className="text-lg font-bold text-slate-800">{car.plate}</h1>
              <p className="text-xs text-slate-500">请选择您的座位</p>
@@ -91,7 +98,7 @@ export const SeatSelection: React.FC<SeatSelectionProps> = ({ user, car, onBack,
           </div>
           
           <p className="mt-8 text-center text-slate-400 text-sm max-w-xs">
-            向右滑动可返回列表 <br/>
+            向右轻滑或点击左上角返回 <br/>
             点击空座入座，点击自己头像离座
           </p>
         </div>
