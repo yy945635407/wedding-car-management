@@ -40,8 +40,56 @@
 *   **开发语言**: [TypeScript](https://www.typescriptlang.org/)
 *   **样式库**: [Tailwind CSS](https://tailwindcss.com/)
 *   **动画库**: [Framer Motion](https://www.framer.com/motion/)
-*   **构建工具**: ES Modules (通过 esm.sh 引入依赖)
+*   **构建工具**: ES Modules (通过 CDN 直接引入，无本地编译需求)
 
-## 📦 部署说明
+---
 
-项目为一个纯静态单页应用 (SPA)，数据目前存储在本地 LocalStorage 中（可根据需求扩展为后端 API）。任何支持静态网站托管的服务（如 Vercel, Netlify, Nginx 等）均可部署。
+## 💻 本地部署与运行手册
+
+本项目不需要复杂的 `npm install` 或构建过程，但由于使用了 ES Modules，**必须通过本地服务器启动**（直接双击 `index.html` 打开会因 CORS 策略报错）。
+
+请选择以下任一方式启动项目：
+
+### 方式一：使用 VS Code Live Server (最推荐 👍)
+适合前端新手或使用 VS Code 的开发者。
+
+1. 下载并安装 [Visual Studio Code](https://code.visualstudio.com/)。
+2. 在 VS Code 中安装 **"Live Server"** 插件。
+3. 使用 VS Code 打开本项目文件夹。
+4. 在左侧文件列表中右键点击 `index.html`。
+5. 选择 **"Open with Live Server"**。
+6. 浏览器将自动打开项目页面。
+
+### 方式二：使用 Python (无需额外安装)
+如果你的电脑是 Mac 或已安装 Python 的 Windows，这是最快的方式。
+
+1. 打开终端 (Terminal) 或 命令提示符 (CMD)。
+2. `cd` 进入项目根目录。
+3. 运行以下命令启动服务：
+   ```bash
+   # 如果是 Python 3.x
+   python -m http.server 8000
+   
+   # 如果是 Python 2.x
+   python -m SimpleHTTPServer 8000
+   ```
+4. 打开浏览器访问：`http://localhost:8000`
+
+### 方式三：使用 Node.js
+如果你是前端开发者，已安装 Node.js 环境。
+
+1. 打开终端进入项目目录。
+2. 使用 `npx` 运行 http-server：
+   ```bash
+   npx http-server .
+   ```
+3. 根据终端提示的地址（通常是 `http://127.0.0.1:8080`）访问。
+
+---
+
+## ☁️ 云服务器部署
+
+项目本质上是一个纯静态网站（HTML + CSS + JS），可以部署在任何静态托管服务上：
+
+1. **Nginx 部署**：将项目所有文件上传至服务器目录（如 `/var/www/wedding`），配置 Nginx `root` 指向该目录即可。
+2. **Vercel / Netlify**：直接关联 GitHub 仓库，Build Command 留空，Output Directory 设置为 `.` (根目录) 即可自动部署。
